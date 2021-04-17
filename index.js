@@ -1,28 +1,28 @@
 "use strict";
-//House
+//in order to work with the existing API some notations refer to room instead of car and area instead of year but interface is setup to show car and year
+
 class CarLot {
   constructor(name) {
     this.name = name;
-    this.car = [];
+    this.rooms = [];//using rooms to coordinate with API
   }
 
-  //addRoom   (name, area)
-  addCar(name, year) {
-    this.car.push(new Car(name, year));
+  
+  addCar(name, area) {//using room and area to coordinate with API
+    this.room.push(new Car(name, area));
   }
 }
-//Room
-class Car {
-  constructor(name, year) {
+
+class Car {//using area to coordinate with API
+  constructor(name, area) {
     this.name = name;
-    this.year = year;
+    this.area = area;
   }
 }
 
 class CarLotServices {
   static url = "https://ancient-taiga-31359.herokuapp.com/api/houses";
 
-  //
   static getAllCarLots() {
     return $.get(this.url);
   }
@@ -34,12 +34,11 @@ class CarLotServices {
     return $.post(this.url, carLot);
   }
 
-  //Works but I'm not sure why. Need to research more...
-  static updateCarLot(car) {
+  static updateCarLot(carLot) {
     return $.ajax({
-      url: this.url + `/${car._id}`,
+      url: this.url + `/${carLot._id}`,
       dataType: "json",
-      data: JSON.stringify(car),
+      data: JSON.stringify(carLot),
       contentType: "application/json",
       type: "PUT",
     });
@@ -57,7 +56,7 @@ class DOMManager {
   static carLots;
 
   static getAllCarLots() {
-    CarLotServices.getAllCarLots().then((carlots) => this.render(carlots));
+    CarLotServices.getAllCarLots().then((carLots) => this.render(carLots));
   }
 
   static createCarLot(name) {
@@ -65,7 +64,7 @@ class DOMManager {
       .then(() => {
         return CarLotServices.getAllCarLots();
       })
-      .then((carlots) => this.render(carlots));
+      .then((carLots) => this.render(carLots));
   }
 
   static deleteCarLot(id) {
@@ -73,7 +72,7 @@ class DOMManager {
       .then(() => {
         return CarLotServices.getAllCarLots();
       })
-      .then((carlots) => this.render(carlots));
+      .then((carLots) => this.render(carLots));
   }
 
   static addCar(id) {
@@ -81,11 +80,11 @@ class DOMManager {
       if (carLot._id == id) {
         carLot.rooms.push(
           new Car(
-            $(`#${carLot._id}-car-name`).val(),
-            $(`#${carLot._id}-car-year`).val()
+            $(`#${carLot._id}-room-name`).val(),
+            $(`#${carLot._id}-room-area`).val()
           )
         );
-        CarLotServices.updateCarLot(name)
+        CarLotServices.updateCarLot(carLot)
           .then(() => {
             return CarLotServices.getAllCarLots();
           })
@@ -94,13 +93,13 @@ class DOMManager {
     }
   }
 
-  static deleteCar(carLotId, carId) {
+  static deleteCar(carLotId, roomId) {
     for (let carLot of this.carLots) {
       if (carLot._id == carLotId) {
-        for (let car of carLot.rooms) {
-          if (car._id == carId) {
-            carLot.rooms.splice(carLot.rooms.indexOf(car), 1);
-            CarLotServices.updatecarLot(carLot)
+        for (let room of carLot.rooms) {
+          if (room._id == roomId) {
+            carLot.rooms.splice(carLot.rooms.indexOf(room), 1);
+            CarLotServices.updateCarLot(carLot)
               .then(() => {
                 return CarLotServices.getAllCarLots();
               })
@@ -110,11 +109,11 @@ class DOMManager {
       }
     }
   }
-  //change
+
   static render(carLots) {
     this.carLots = carLots;
     $("app").empty();
-    for (let carLot of this.carLots) {
+    for (let carLot of carLots) {//removed this.
       $("#app").prepend(
         `<div id="${carLot._id}" class="card">
             <div class="card-header"> 
@@ -125,24 +124,24 @@ class DOMManager {
                 <div class="card">
                     <div class="row">
                         <div class="col-sm">
-                            <input type="text" id="${carLot._id}-car-name" class="form-control" placeholder="Car Make And Model">
+                            <input type="text" id="${carLot._id}-room-name" class="form-control" placeholder="Car Make And Model">
                         </div>
                         <div class="col-sm">
-                            <input type="text" id="${carLot._id}-car-year" class="form-control" placeholder="Year">
+                            <input type="text" id="${carLot._id}-room-area" class="form-control" placeholder="Year">
                         </div>
                 
                         </div>
-                        <button id="${carLot._id}-new-car" onclick="DOMManager.addCar('${carLot._id}')" class="btn btn-primary form-control">Add</button>
+                        <button id="${carLot._id}-new-room" onclick="DOMManager.addCar('${carLot._id}')" class="btn btn-primary form-control">Add</button>
                     </div>
             </div>
         </div><br>`
       );
-      for (let car of carLot.rooms) {
+      for (let room of carLot.rooms) {
         $(`#${carLot._id}`).find(".card-body").append(
           `<p>
-                <span id="name-${car._id}"><strong>Name: </strong> ${car.name}</span>
-                <span id="year-${car._id}"><strong>Year: </strong> ${car.area}</span>
-                <button class="btn btn-danger" onclick="DOMManager.deleteCar('${carLot._id}', '${car._id}')">Mark As Sold</button> </p>`
+                <span id="name-${room._id}"><strong>Name: </strong> ${room.name}</span>
+                <span id="year-${room._id}"><strong>Year: </strong> ${room.area}</span>
+                <button class="btn btn-danger" onclick="DOMManager.deleteCar('${carLot._id}', '${room._id}')">Mark As Sold</button> </p>`
         );
       }
     }
