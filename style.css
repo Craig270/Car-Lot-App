@@ -1,0 +1,42 @@
+body {
+  background-color: bisque;
+  padding: 2%;
+  font-family: Georgia, serif;
+  background-image: url("car1.jpg");
+}
+div {
+  background-color: rgba(153, 130, 103, 0.89);
+}
+.jumbotron {
+  background-color: #846c5b;
+  font-weight: bolder;
+  text-align: center;
+  font-size: large;
+  opacity: 0.95;
+}
+#create-new-house {
+  background-color: #d8d4f2;
+  color: black;
+  border-color: #d8d4f2;
+}
+#create-new-house:hover {
+  background-color: #c4b2bc;
+  color: black;
+}
+#app {
+  text-align: center;
+  background-color: #c4b2bc;
+  font-size: large;
+  opacity: 0.95;
+}
+.card-header {
+  background-color: #c4b2bc;
+}
+.title-page {
+  background-color: #332e3c;
+  text-align: center;
+  font-size: 60px;
+  color: white;
+  border-radius: 40%;
+  opacity: 0.8;
+}
