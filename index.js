@@ -110,7 +110,7 @@ class DOMManager {
       }
     }
   }
-
+  //change
   static render(carLots) {
     this.carLots = carLots;
     $("app").empty();
