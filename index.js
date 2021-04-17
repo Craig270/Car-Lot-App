@@ -1,49 +1,50 @@
 "use strict";
+//in order to work with the existing API some notations refer to room instead of car and area instead of year but interface is setup to show car and year
 
-class House {
+class CarLot {
   constructor(name) {
     this.name = name;
-    this.room = [];
+    this.rooms = [];//using rooms to coordinate with API
   }
 
-  addRoom(name, area) {
-    this.room.push(new Room(name, area));
+  
+  addCar(name, area) {//using room and area to coordinate with API
+    this.room.push(new Car(name, area));
   }
 }
 
-class Room {
+class Car {//using area to coordinate with API
   constructor(name, area) {
     this.name = name;
     this.area = area;
   }
 }
 
-class HouseServics {
+class CarLotServices {
   static url = "https://ancient-taiga-31359.herokuapp.com/api/houses";
 
-  static getAllHouses() {
+  static getAllCarLots() {
     return $.get(this.url);
   }
 
-  static getHouse(id) {
+  static getCarLot(id) {
     return $.get(this.url + `/${id}`);
   }
-  static createHouse(house) {
-    return $.post(this.url, house);
+  static createCarLot(carLot) {
+    return $.post(this.url, carLot);
   }
 
-  //Works but I'm not sure why. Need to research more...
-  static updateHouse(house) {
+  static updateCarLot(carLot) {
     return $.ajax({
-      url: this.url + `/${house._id}`,
+      url: this.url + `/${carLot._id}`,
       dataType: "json",
-      data: JSON.stringify(house),
+      data: JSON.stringify(carLot),
       contentType: "application/json",
       type: "PUT",
     });
   }
 
-  static deleteHouse(id) {
+  static deleteCarLot(id) {
     return $.ajax({
       url: this.url + `/${id}`,
       type: "DELETE",
@@ -52,103 +53,103 @@ class HouseServics {
 }
 
 class DOMManager {
-  static houses;
+  static carLots;
 
-  static getAllHouses() {
-    HouseServics.getAllHouses().then((houses) => this.render(houses));
+  static getAllCarLots() {
+    CarLotServices.getAllCarLots().then((carLots) => this.render(carLots));
   }
 
-  static createHouse(name) {
-    HouseServics.createHouse(new House(name))
+  static createCarLot(name) {
+    CarLotServices.createCarLot(new CarLot(name))
       .then(() => {
-        return HouseServics.getAllHouses();
+        return CarLotServices.getAllCarLots();
       })
-      .then((houses) => this.render(houses));
+      .then((carLots) => this.render(carLots));
   }
 
-  static deleteHouse(id) {
-    HouseServics.deleteHouse(id)
+  static deleteCarLot(id) {
+    CarLotServices.deleteCarLot(id)
       .then(() => {
-        return HouseServics.getAllHouses();
+        return CarLotServices.getAllCarLots();
       })
-      .then((houses) => this.render(houses));
+      .then((carLots) => this.render(carLots));
   }
 
-  static addRoom(id) {
-    for (let house of this.houses) {
-      if (house._id == id) {
-        house.rooms.push(
-          new Room(
-            $(`#${house._id}-room-name`).val(),
-            $(`#${house._id}-room-area`).val()
+  static addCar(id) {
+    for (let carLot of this.carLots) {
+      if (carLot._id == id) {
+        carLot.rooms.push(
+          new Car(
+            $(`#${carLot._id}-room-name`).val(),
+            $(`#${carLot._id}-room-area`).val()
           )
         );
-        HouseServics.updateHouse(house)
+        CarLotServices.updateCarLot(carLot)
           .then(() => {
-            return HouseServics.getAllHouses();
+            return CarLotServices.getAllCarLots();
           })
-          .then((houses) => this.render(houses));
+          .then((carLots) => this.render(carLots));
       }
     }
   }
 
-  static deleteRoom(houseId, roomId) {
-    for (let house of this.houses) {
-      if (house._id == houseId) {
-        for (let room of house.rooms) {
+  static deleteCar(carLotId, roomId) {
+    for (let carLot of this.carLots) {
+      if (carLot._id == carLotId) {
+        for (let room of carLot.rooms) {
           if (room._id == roomId) {
-            house.rooms.splice(house.rooms.indexOf(room), 1);
-            HouseServics.updateHouse(house)
+            carLot.rooms.splice(carLot.rooms.indexOf(room), 1);
+            CarLotServices.updateCarLot(carLot)
               .then(() => {
-                return HouseServics.getAllHouses();
+                return CarLotServices.getAllCarLots();
               })
-              .then((houses) => this.render(houses));
+              .then((carLots) => this.render(carLots));
           }
         }
       }
     }
   }
 
-  static render(houses) {
-    this.houses = houses;
+  static render(carLots) {
+    this.carLots = carLots;
     $("app").empty();
-    for (let house of this.houses) {
+    for (let carLot of carLots) {//removed this.
       $("#app").prepend(
-        `<div id="${house._id}" class="card">
+        `<div id="${carLot._id}" class="card">
             <div class="card-header"> 
-                <h2>${house.name}</h2>
-                <button class="btn btn-danger" onclick="DOMManager.deleteHouse('${house._id}')">Delete</button>
+                <h2>${carLot.name}</h2>
+                <button class="btn btn-danger" onclick="DOMManager.deleteCarLot('${carLot._id}')">Delete</button>
             </div>
             <div class="card-body">
                 <div class="card">
                     <div class="row">
                         <div class="col-sm">
-                            <input type="text" id="${house._id}-room-name" class="form-control" placeholder="Room Name">
+                            <input type="text" id="${carLot._id}-room-name" class="form-control" placeholder="Car Make And Model">
                         </div>
                         <div class="col-sm">
-                            <input type="text" id="${house._id}-room-area" class="form-control" placeholder="Room Area">
+                            <input type="text" id="${carLot._id}-room-area" class="form-control" placeholder="Year">
                         </div>
                 
                         </div>
-                        <button id="${house._id}-new-room" onclick="DOMManager.addRoom('${house._id}')" class="btn btn-primary form-control">Add</button>
+                        <button id="${carLot._id}-new-room" onclick="DOMManager.addCar('${carLot._id}')" class="btn btn-primary form-control">Add</button>
                     </div>
             </div>
         </div><br>`
       );
-      for (let room of house.rooms) {
-        $(`#${house._id}`).find(".card-body").append(
+      for (let room of carLot.rooms) {
+        $(`#${carLot._id}`).find(".card-body").append(
           `<p>
                 <span id="name-${room._id}"><strong>Name: </strong> ${room.name}</span>
-                <span id="area-${room._id}"><strong>Area: </strong> ${room.area}</span>
-                <button class="btn btn-danger" onclick="DOMManager.deleteRoom('${house._id}', '${room._id}')">Delete Room</button> </p>`
+                <span id="year-${room._id}"><strong>Year: </strong> ${room.area}</span>
+                <button class="btn btn-danger" onclick="DOMManager.deleteCar('${carLot._id}', '${room._id}')">Mark As Sold</button> </p>`
         );
       }
     }
   }
 }
-$("#create-new-house").on("click", () => {
-  DOMManager.createHouse($("#new-house-name").val());
-  $("#new-house-name").val("");
+$("#create-new-carLot").on("click", () => {
+  DOMManager.createCarLot($("#new-carLot-name").val());
+  $("#new-carLot-name").val("");
 });
 
-DOMManager.getAllHouses();
+DOMManager.getAllCarLots();
